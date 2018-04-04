@@ -43,6 +43,10 @@
 
 <script>
     export default {
+        props: [
+            'uploadUrl',
+            'getAllUrl'
+        ],
         data() {
             return {
                 show: {
