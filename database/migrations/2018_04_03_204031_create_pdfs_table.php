@@ -15,7 +15,8 @@ class CreatePdfsTable extends Migration
     {
         Schema::create('pdfs', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
+            $table->string('url');
+            $table->string('thumb');
             $table->timestamps();
         });
     }

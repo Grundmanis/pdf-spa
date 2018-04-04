@@ -14,6 +14,10 @@ class PdfController extends Controller
      */
     private $pdf;
 
+    /**
+     * PdfController constructor.
+     * @param Pdf $pdf
+     */
     public function __construct(Pdf $pdf)
     {
         $this->pdf = $pdf;
@@ -43,8 +47,20 @@ class PdfController extends Controller
             ->file('pdf')
             ->store('pdfs');
 
+        // TODO refactor
+
+        $pdfName = str_replace('.pdf', '', $name);
+        $imgName = 'img/' . $pdfName . '.jpg';
+
+        $image = new \Imagick(storage_path('app/' . $name . '[0]'));
+        $image->setImageColorspace(255); // prevent image colors from inverting
+        $image->setimageformat("jpeg");
+        $image->thumbnailimage(60, 120);
+        $image->writeimage($imgName);
+
         $pdf = $this->pdf->create([
-            'name' => $name
+            'url' => $name,
+            'thumb' => $imgName
         ]);
 
         return response()->json([
