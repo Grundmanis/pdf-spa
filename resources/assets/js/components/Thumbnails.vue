@@ -4,7 +4,7 @@
             <div class="col">
                 <div class="upload-btn-wrapper">
                     <button class="btn btn-success">Upload pdf</button>
-                    <input type="file" v-on:change="uploadPdfHandler">
+                    <input type="file" accept=".pdf" v-on:change="uploadPdfHandler">
                 </div>
             </div>
         </div>
@@ -43,10 +43,6 @@
 
 <script>
     export default {
-        props: [
-            'uploadUrl',
-            'getAllUrl'
-        ],
         data() {
             return {
                 show: {
@@ -56,30 +52,29 @@
                     perPage: 20,
                     currentPage: 1,
                     totalPages: null,
-                    pdfs: {
-                        1: {
-                            id: 1
-                        }
-                    },
-                    urls: {
-                        upload: '',
-                        getAll: '',
-                    }
+                    pdfs: []
+                },
+                urls: {
+                    pdfs: '/v1/pdfs/',
                 },
             }
         },
         methods: {
             uploadPdfHandler(e) {
 
-                // TODO check if it's pdf format
-
-                let file = e.target.files || e.dataTransfer.files;
-
-                if (!file.length) {
-                    //
+                let files = e.target.files || e.dataTransfer.files;
+                if (!files.length) {
+                    console.error('no file');
+                    return;
                 }
 
-                this._uploadPdf(file.item(0));
+                let pdf = files.item(0);
+                if (pdf.type !== 'application/pdf') {
+                    console.error('no pdf');
+                    return;
+                }
+
+                this._uploadPdf(files.item(0));
 
             },
             _uploadPdf(pdf) {
@@ -89,12 +84,16 @@
                         headers: {'content-type': 'multipart/form-data'}
                     };
 
-                data.append('file', pdf);
+                data.append('pdf', pdf);
 
-                axios.post(this.urls.upload, data, config)
+                axios.post(this.urls.pdfs, data, config)
                     .then(result => {
 
-                        //
+                        if (result.data.pdf.id) {
+                            return this.data.pdfs.push(result.data.pdf);
+                        }
+
+                        console.error('fail to upload');
 
                     }).catch(result => {
 

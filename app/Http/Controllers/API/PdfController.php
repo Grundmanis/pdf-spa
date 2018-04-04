@@ -2,11 +2,23 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Pdf;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class PdfController extends Controller
 {
+
+    /**
+     * @var Pdf
+     */
+    private $pdf;
+
+    public function __construct(Pdf $pdf)
+    {
+        $this->pdf = $pdf;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +26,9 @@ class PdfController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json([
+           'pdfs' => $this->pdf->all()
+        ]);
     }
 
     /**
@@ -25,7 +39,17 @@ class PdfController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $name = $request
+            ->file('pdf')
+            ->store('pdfs');
+
+        $pdf = $this->pdf->create([
+            'name' => $name
+        ]);
+
+        return response()->json([
+            'pdf' => $pdf
+        ]);
     }
 
     /**

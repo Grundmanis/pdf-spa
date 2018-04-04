@@ -47300,7 +47300,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: ['uploadUrl', 'getAllUrl'],
     data: function data() {
         return {
             show: {
@@ -47310,15 +47309,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 perPage: 20,
                 currentPage: 1,
                 totalPages: null,
-                pdfs: {
-                    1: {
-                        id: 1
-                    }
-                },
-                urls: {
-                    upload: '',
-                    getAll: ''
-                }
+                pdfs: []
+            },
+            urls: {
+                pdfs: '/v1/pdfs/'
             }
         };
     },
@@ -47326,29 +47320,37 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     methods: {
         uploadPdfHandler: function uploadPdfHandler(e) {
 
-            // TODO check if it's pdf format
-
-            var file = e.target.files || e.dataTransfer.files;
-
-            if (!file.length) {
-                //
+            var files = e.target.files || e.dataTransfer.files;
+            if (!files.length) {
+                console.error('no file');
+                return;
             }
 
-            this._uploadPdf(file.item(0));
+            var pdf = files.item(0);
+            if (pdf.type !== 'application/pdf') {
+                console.error('no pdf');
+                return;
+            }
+
+            this._uploadPdf(files.item(0));
         },
         _uploadPdf: function _uploadPdf(pdf) {
+            var _this = this;
 
             var data = new FormData(),
                 config = {
                 headers: { 'content-type': 'multipart/form-data' }
             };
 
-            data.append('file', pdf);
+            data.append('pdf', pdf);
 
-            axios.post(this.urls.upload, data, config).then(function (result) {
+            axios.post(this.urls.pdfs, data, config).then(function (result) {
 
-                //
+                if (result.data.pdf.id) {
+                    return _this.data.pdfs.push(result.data.pdf);
+                }
 
+                console.error('fail to upload');
             }).catch(function (result) {
 
                 //
@@ -47386,7 +47388,7 @@ var render = function() {
             ]),
             _vm._v(" "),
             _c("input", {
-              attrs: { type: "file" },
+              attrs: { type: "file", accept: ".pdf" },
               on: { change: _vm.uploadPdfHandler }
             })
           ])
