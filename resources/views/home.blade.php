@@ -38,7 +38,7 @@
 
         <div class="container" id="app">
 
-           <thumbnails></thumbnails>
+           <thumbnails thumbs-per-page="{{ App\Pdf::PER_PAGE }}"></thumbnails>
 
         </div>
 

@@ -47307,18 +47307,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['thumbsPerPage'],
     data: function data() {
         return {
             show: {
                 pdf: false
             },
             data: {
-                perPage: 13, // TODO set one var
+                perPage: 0,
                 currentPage: 1,
+                total: 0,
                 totalPages: null,
-                pdfs: {}
+                pdfs: {},
+                activePdf: {}
             },
             urls: {
                 pdfs: '/v1/pdfs/'
@@ -47326,6 +47331,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         };
     },
     mounted: function mounted() {
+        this.data.perPage = this.thumbsPerPage;
         this._getForPage();
     },
 
@@ -47363,6 +47369,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                 if (result.data.pdf.id) {
 
+                    _this.data.total += 1;
+
                     if (isLastPage && _this.data.perPage > currentPagePdfs.length) {
 
                         _this.data.pdfs[_this.data.currentPage].push(result.data.pdf);
@@ -47386,8 +47394,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.get(this.urls.pdfs + '?page=' + this.data.currentPage).then(function (result) {
 
                 if (result.data.pdfs) {
+
+                    _this2.data.total = result.data.pdfs.total;
                     _this2.data.totalPages = result.data.pdfs.last_page;
                     _this2.data.pdfs[_this2.data.currentPage] = result.data.pdfs.data;
+
                     return _this2.$forceUpdate();
                 }
 
@@ -47397,7 +47408,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 console.error('error catched - fail to get for page');
             });
         },
-        openPdf: function openPdf(id) {
+        openPdf: function openPdf(pdf) {
+            this.data.activePdf = pdf;
             this.show.pdf = true;
         },
         nextPage: function nextPage() {
@@ -47423,138 +47435,154 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    [
-      _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "col" }, [
-          _c("div", { staticClass: "upload-btn-wrapper" }, [
-            _c("button", { staticClass: "btn btn-success" }, [
-              _vm._v("Upload pdf")
+  return _c("div", [
+    _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col" }, [
+        _c("div", { staticClass: "upload-btn-wrapper" }, [
+          _c("button", { staticClass: "btn btn-success" }, [
+            _vm._v("Upload pdf")
+          ]),
+          _vm._v(" "),
+          _c("input", {
+            attrs: { type: "file", accept: ".pdf" },
+            on: { change: _vm.uploadPdfHandler }
+          })
+        ])
+      ])
+    ]),
+    _vm._v(" "),
+    _vm.data.total
+      ? _c(
+          "div",
+          [
+            _c(
+              "div",
+              { staticClass: "row thumbnails" },
+              _vm._l(_vm.data.pdfs[_vm.data.currentPage], function(pdf) {
+                return _c("div", { staticClass: "col-3" }, [
+                  _c(
+                    "a",
+                    {
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          $event.preventDefault()
+                          _vm.openPdf(pdf)
+                        }
+                      }
+                    },
+                    [_c("img", { attrs: { src: pdf.thumb, alt: "" } })]
+                  )
+                ])
+              })
+            ),
+            _vm._v(" "),
+            _c("div", { staticClass: "row" }, [
+              _c(
+                "nav",
+                { attrs: { "aria-label": "Page navigation example" } },
+                [
+                  _c(
+                    "ul",
+                    { staticClass: "pagination" },
+                    [
+                      _vm.data.currentPage > 1
+                        ? _c("li", { staticClass: "page-item" }, [
+                            _c(
+                              "a",
+                              {
+                                staticClass: "page-link",
+                                attrs: { href: "#" },
+                                on: {
+                                  click: function($event) {
+                                    $event.preventDefault()
+                                    _vm.prevPage()
+                                  }
+                                }
+                              },
+                              [_vm._v("Previous")]
+                            )
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm._l(_vm.data.totalPages, function(page) {
+                        return _c(
+                          "li",
+                          {
+                            staticClass: "page-item",
+                            class: { active: page == _vm.data.currentPage },
+                            on: {
+                              click: function($event) {
+                                $event.preventDefault()
+                                _vm.setPage(page)
+                              }
+                            }
+                          },
+                          [
+                            _c(
+                              "a",
+                              {
+                                staticClass: "page-link",
+                                attrs: { href: "#" }
+                              },
+                              [_vm._v(_vm._s(page) + " ")]
+                            )
+                          ]
+                        )
+                      }),
+                      _vm._v(" "),
+                      _vm.data.currentPage < _vm.data.totalPages
+                        ? _c("li", { staticClass: "page-item" }, [
+                            _c(
+                              "a",
+                              {
+                                staticClass: "page-link",
+                                attrs: { href: "#" },
+                                on: {
+                                  click: function($event) {
+                                    $event.preventDefault()
+                                    _vm.nextPage()
+                                  }
+                                }
+                              },
+                              [_vm._v("Next")]
+                            )
+                          ])
+                        : _vm._e()
+                    ],
+                    2
+                  )
+                ]
+              )
             ]),
             _vm._v(" "),
-            _c("input", {
-              attrs: { type: "file", accept: ".pdf" },
-              on: { change: _vm.uploadPdfHandler }
-            })
-          ])
-        ])
-      ]),
-      _vm._v(" "),
-      _c(
-        "div",
-        { staticClass: "row thumbnails" },
-        _vm._l(_vm.data.pdfs[_vm.data.currentPage], function(pdf) {
-          return _c("div", { staticClass: "col-3" }, [
-            _c(
-              "a",
-              {
-                attrs: { href: "#" },
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    _vm.openPdf(pdf.id)
-                  }
-                }
-              },
-              [_c("img", { attrs: { src: pdf.thumb, alt: "" } })]
-            )
-          ])
-        })
-      ),
-      _vm._v(" "),
-      _c("div", { staticClass: "row" }, [
-        _c("nav", { attrs: { "aria-label": "Page navigation example" } }, [
-          _c(
-            "ul",
-            { staticClass: "pagination" },
-            [
-              _vm.data.currentPage > 1
-                ? _c("li", { staticClass: "page-item" }, [
-                    _c(
-                      "a",
-                      {
-                        staticClass: "page-link",
-                        attrs: { href: "#" },
-                        on: {
-                          click: function($event) {
-                            $event.preventDefault()
-                            _vm.prevPage()
-                          }
-                        }
-                      },
-                      [_vm._v("Previous")]
-                    )
-                  ])
-                : _vm._e(),
-              _vm._v(" "),
-              _vm._l(_vm.data.totalPages, function(page) {
-                return _c(
-                  "li",
+            _vm.show.pdf
+              ? _c(
+                  "modal",
                   {
-                    staticClass: "page-item",
-                    class: { active: page == _vm.data.currentPage },
                     on: {
-                      click: function($event) {
-                        $event.preventDefault()
-                        _vm.setPage(page)
+                      close: function($event) {
+                        _vm.show.pdf = false
                       }
                     }
                   },
                   [
-                    _c(
-                      "a",
-                      { staticClass: "page-link", attrs: { href: "#" } },
-                      [_vm._v(_vm._s(page) + " ")]
-                    )
+                    _c("iframe", {
+                      attrs: { slot: "body", src: _vm.data.activePdf.url },
+                      slot: "body"
+                    }),
+                    _vm._v(" "),
+                    _c("h3", { attrs: { slot: "header" }, slot: "header" }, [
+                      _vm._v("custom header")
+                    ])
                   ]
                 )
-              }),
-              _vm._v(" "),
-              _vm.data.currentPage < _vm.data.totalPages
-                ? _c("li", { staticClass: "page-item" }, [
-                    _c(
-                      "a",
-                      {
-                        staticClass: "page-link",
-                        attrs: { href: "#" },
-                        on: {
-                          click: function($event) {
-                            $event.preventDefault()
-                            _vm.nextPage()
-                          }
-                        }
-                      },
-                      [_vm._v("Next")]
-                    )
-                  ])
-                : _vm._e()
-            ],
-            2
-          )
-        ])
-      ]),
-      _vm._v(" "),
-      _vm.show.pdf
-        ? _c(
-            "modal",
-            {
-              on: {
-                close: function($event) {
-                  _vm.show.pdf = false
-                }
-              }
-            },
-            [
-              _c("h3", { attrs: { slot: "header" }, slot: "header" }, [
-                _vm._v("custom header")
-              ])
-            ]
-          )
-        : _vm._e()
-    ],
-    1
-  )
+              : _vm._e()
+          ],
+          1
+        )
+      : _c("div", [_c("p", [_vm._v("No pdfs :(")])])
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -47573,7 +47601,7 @@ if (false) {
 var disposed = false
 var normalizeComponent = __webpack_require__(11)
 /* script */
-var __vue_script__ = __webpack_require__(44)
+var __vue_script__ = null
 /* template */
 var __vue_template__ = __webpack_require__(45)
 /* template functional */
@@ -47614,51 +47642,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 44 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-    methods: {
-        uploadPdfHandler: function uploadPdfHandler() {}
-    }
-});
-
-/***/ }),
+/* 44 */,
 /* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -47670,19 +47654,6 @@ var render = function() {
     _c("div", { staticClass: "modal-mask" }, [
       _c("div", { staticClass: "modal-wrapper" }, [
         _c("div", { staticClass: "modal-container" }, [
-          _c(
-            "div",
-            { staticClass: "modal-header" },
-            [
-              _vm._t("header", [
-                _vm._v(
-                  "\n                        default header\n                    "
-                )
-              ])
-            ],
-            2
-          ),
-          _vm._v(" "),
           _c(
             "div",
             { staticClass: "modal-body" },
@@ -47701,13 +47672,10 @@ var render = function() {
             { staticClass: "modal-footer" },
             [
               _vm._t("footer", [
-                _vm._v(
-                  "\n                        default footer\n                        "
-                ),
                 _c(
                   "button",
                   {
-                    staticClass: "modal-default-button",
+                    staticClass: "btn btn-danger",
                     on: {
                       click: function($event) {
                         _vm.$emit("close")
@@ -47716,7 +47684,7 @@ var render = function() {
                   },
                   [
                     _vm._v(
-                      "\n                            OK\n                        "
+                      "\n                            Close\n                        "
                     )
                   ]
                 )

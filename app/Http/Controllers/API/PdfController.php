@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Pdf;
+use App\Services\PdfThumbCreator;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -15,12 +16,19 @@ class PdfController extends Controller
     private $pdf;
 
     /**
+     * @var PdfThumbCreator
+     */
+    private $pdfThumbCreator;
+
+    /**
      * PdfController constructor.
      * @param Pdf $pdf
+     * @param PdfThumbCreator $pdfThumbCreator
      */
-    public function __construct(Pdf $pdf)
+    public function __construct(Pdf $pdf, PdfThumbCreator $pdfThumbCreator)
     {
         $this->pdf = $pdf;
+        $this->pdfThumbCreator = $pdfThumbCreator;
     }
 
     /**
@@ -31,7 +39,7 @@ class PdfController extends Controller
     public function index()
     {
         return response()->json([
-           'pdfs' => $this->pdf->paginate(13)
+           'pdfs' => $this->pdf->paginate(PDF::PER_PAGE)
         ]);
     }
 
@@ -47,20 +55,11 @@ class PdfController extends Controller
             ->file('pdf')
             ->store('pdfs');
 
-        // TODO refactor
-
-        $pdfName = str_replace('.pdf', '', $name);
-        $imgName = 'img/' . $pdfName . '.jpg';
-
-        $image = new \Imagick(storage_path('app/' . $name . '[0]'));
-        $image->setImageColorspace(255); // prevent image colors from inverting
-        $image->setimageformat("jpeg");
-        $image->thumbnailimage(60, 80);
-        $image->writeimage($imgName);
+        $thumb = $this->pdfThumbCreator->create($name);
 
         $pdf = $this->pdf->create([
-            'url' => $name,
-            'thumb' => $imgName
+            'url' => asset('storage/' . $name),
+            'thumb' => $thumb
         ]);
 
         return response()->json([

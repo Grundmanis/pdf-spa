@@ -8,43 +8,45 @@
                 </div>
             </div>
         </div>
-        <div class="row thumbnails">
-            <div class="col-3" v-for="pdf in data.pdfs[data.currentPage]">
-                <a v-on:click.prevent="openPdf(pdf.id)" href="#">
-                    <img :src="pdf.thumb" alt="">
-                </a>
+        <div v-if="data.total">
+            <div class="row thumbnails">
+                <div class="col-3" v-for="pdf in data.pdfs[data.currentPage]">
+                    <a v-on:click.prevent="openPdf(pdf)" href="#">
+                        <img :src="pdf.thumb" alt="">
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <div class="row">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                    <li v-if="data.currentPage > 1" class="page-item">
-                        <a v-on:click.prevent="prevPage()" class="page-link" href="#">Previous</a>
-                    </li>
-                    <li
-                            v-for="page in data.totalPages"
-                            v-on:click.prevent="setPage(page)"
-                            class="page-item"
-                            :class="{active: page == data.currentPage}"
-                    >
-                        <a class="page-link" href="#">{{ page }} </a>
-                    </li>
-                    <li v-if="data.currentPage < data.totalPages" class="page-item">
-                        <a v-on:click.prevent="nextPage()" class="page-link" href="#">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
+            <div class="row">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        <li v-if="data.currentPage > 1" class="page-item">
+                            <a v-on:click.prevent="prevPage()" class="page-link" href="#">Previous</a>
+                        </li>
+                        <li
+                                v-for="page in data.totalPages"
+                                v-on:click.prevent="setPage(page)"
+                                class="page-item"
+                                :class="{active: page == data.currentPage}"
+                        >
+                            <a class="page-link" href="#">{{ page }} </a>
+                        </li>
+                        <li v-if="data.currentPage < data.totalPages" class="page-item">
+                            <a v-on:click.prevent="nextPage()" class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
 
-        <!-- use the modal component, pass in the prop -->
-        <modal v-if="show.pdf" @close="show.pdf = false">
-            <!--
-              you can use custom content here to overwrite
-              default content
-            -->
-            <h3 slot="header">custom header</h3>
-        </modal>
+            <!-- use the modal component, pass in the prop -->
+            <modal v-if="show.pdf" @close="show.pdf = false">
+                <iframe slot="body" :src="data.activePdf.url"></iframe>
+                <h3 slot="header">custom header</h3>
+            </modal>
+        </div>
+        <div v-else>
+            <p>No pdfs :(</p>
+        </div>
 
     </div>
 
@@ -52,16 +54,19 @@
 
 <script>
     export default {
+        props: ['thumbsPerPage'],
         data() {
             return {
                 show: {
-                  pdf: false
+                    pdf: false
                 },
                 data: {
-                    perPage: 13, // TODO set one var
+                    perPage: 0,
                     currentPage: 1,
+                    total: 0,
                     totalPages: null,
-                    pdfs: {}
+                    pdfs: {},
+                    activePdf: {}
                 },
                 urls: {
                     pdfs: '/v1/pdfs/',
@@ -69,7 +74,8 @@
             }
         },
         mounted() {
-          this._getForPage();
+            this.data.perPage = this.thumbsPerPage;
+            this._getForPage();
         },
         methods: {
             uploadPdfHandler(e) {
@@ -106,6 +112,8 @@
 
                         if (result.data.pdf.id) {
 
+                            this.data.total += 1;
+
                             if (isLastPage && this.data.perPage > currentPagePdfs.length) {
 
                                 this.data.pdfs[this.data.currentPage].push(result.data.pdf);
@@ -133,8 +141,11 @@
                     .then(result => {
 
                         if (result.data.pdfs) {
+
+                            this.data.total = result.data.pdfs.total;
                             this.data.totalPages = result.data.pdfs.last_page;
                             this.data.pdfs[this.data.currentPage] = result.data.pdfs.data;
+
                             return this.$forceUpdate();
                         }
 
@@ -146,7 +157,8 @@
 
                 });
             },
-            openPdf(id) {
+            openPdf(pdf) {
+                this.data.activePdf = pdf;
                 this.show.pdf = true;
             },
             nextPage() {
@@ -158,8 +170,8 @@
                 this._getForPage();
             },
             setPage(page) {
-              this.data.currentPage = page;
-              this._getForPage();
+                this.data.currentPage = page;
+                this._getForPage();
             }
         }
     }
