@@ -31,7 +31,7 @@ class PdfController extends Controller
     public function index()
     {
         return response()->json([
-           'pdfs' => $this->pdf->all()
+           'pdfs' => $this->pdf->paginate(13)
         ]);
     }
 
@@ -55,7 +55,7 @@ class PdfController extends Controller
         $image = new \Imagick(storage_path('app/' . $name . '[0]'));
         $image->setImageColorspace(255); // prevent image colors from inverting
         $image->setimageformat("jpeg");
-        $image->thumbnailimage(60, 120);
+        $image->thumbnailimage(60, 80);
         $image->writeimage($imgName);
 
         $pdf = $this->pdf->create([

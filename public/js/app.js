@@ -47298,6 +47298,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -47306,15 +47315,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 pdf: false
             },
             data: {
-                perPage: 20,
+                perPage: 13, // TODO set one var
                 currentPage: 1,
                 totalPages: null,
-                pdfs: []
+                pdfs: {}
             },
             urls: {
                 pdfs: '/v1/pdfs/'
             }
         };
+    },
+    mounted: function mounted() {
+        this._getForPage();
     },
 
     methods: {
@@ -47346,15 +47358,43 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             axios.post(this.urls.pdfs, data, config).then(function (result) {
 
+                var isLastPage = _this.data.currentPage === _this.data.totalPages,
+                    currentPagePdfs = _this.data.pdfs[_this.data.currentPage];
+
                 if (result.data.pdf.id) {
-                    return _this.data.pdfs.push(result.data.pdf);
+
+                    if (isLastPage && _this.data.perPage > currentPagePdfs.length) {
+
+                        _this.data.pdfs[_this.data.currentPage].push(result.data.pdf);
+                    } else if (isLastPage) {
+
+                        _this.data.totalPages += 1;
+                    }
+
+                    return _this.$forceUpdate();
                 }
 
                 console.error('fail to upload');
             }).catch(function (result) {
 
-                //
+                console.error('error catched - fail to upload');
+            });
+        },
+        _getForPage: function _getForPage() {
+            var _this2 = this;
 
+            axios.get(this.urls.pdfs + '?page=' + this.data.currentPage).then(function (result) {
+
+                if (result.data.pdfs) {
+                    _this2.data.totalPages = result.data.pdfs.last_page;
+                    _this2.data.pdfs[_this2.data.currentPage] = result.data.pdfs.data;
+                    return _this2.$forceUpdate();
+                }
+
+                console.error('fail to get for page');
+            }).catch(function (result) {
+
+                console.error('error catched - fail to get for page');
             });
         },
         openPdf: function openPdf(id) {
@@ -47362,9 +47402,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         nextPage: function nextPage() {
             this.data.currentPage += 1;
+            this._getForPage();
         },
         prevPage: function prevPage() {
             this.data.currentPage -= 1;
+            this._getForPage();
+        },
+        setPage: function setPage(page) {
+            this.data.currentPage = page;
+            this._getForPage();
         }
     }
 });
@@ -47398,7 +47444,7 @@ var render = function() {
       _c(
         "div",
         { staticClass: "row thumbnails" },
-        _vm._l(_vm.data.pdfs, function(pdf) {
+        _vm._l(_vm.data.pdfs[_vm.data.currentPage], function(pdf) {
           return _c("div", { staticClass: "col-3" }, [
             _c(
               "a",
@@ -47411,15 +47457,7 @@ var render = function() {
                   }
                 }
               },
-              [
-                _c("img", {
-                  attrs: {
-                    src:
-                      "https://www.online-tech-tips.com/wp-content/uploads/2009/09/smallpdf.jpg",
-                    alt: ""
-                  }
-                })
-              ]
+              [_c("img", { attrs: { src: pdf.thumb, alt: "" } })]
             )
           ])
         })
@@ -47427,47 +47465,73 @@ var render = function() {
       _vm._v(" "),
       _c("div", { staticClass: "row" }, [
         _c("nav", { attrs: { "aria-label": "Page navigation example" } }, [
-          _c("ul", { staticClass: "pagination" }, [
-            _c("li", { staticClass: "page-item" }, [
-              _c(
-                "a",
-                {
-                  staticClass: "page-link",
-                  attrs: { href: "#" },
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      _vm.prevPage()
+          _c(
+            "ul",
+            { staticClass: "pagination" },
+            [
+              _vm.data.currentPage > 1
+                ? _c("li", { staticClass: "page-item" }, [
+                    _c(
+                      "a",
+                      {
+                        staticClass: "page-link",
+                        attrs: { href: "#" },
+                        on: {
+                          click: function($event) {
+                            $event.preventDefault()
+                            _vm.prevPage()
+                          }
+                        }
+                      },
+                      [_vm._v("Previous")]
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm._l(_vm.data.totalPages, function(page) {
+                return _c(
+                  "li",
+                  {
+                    staticClass: "page-item",
+                    class: { active: page == _vm.data.currentPage },
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        _vm.setPage(page)
+                      }
                     }
-                  }
-                },
-                [_vm._v("Previous")]
-              )
-            ]),
-            _vm._v(" "),
-            _vm._m(0),
-            _vm._v(" "),
-            _vm._m(1),
-            _vm._v(" "),
-            _vm._m(2),
-            _vm._v(" "),
-            _c("li", { staticClass: "page-item" }, [
-              _c(
-                "a",
-                {
-                  staticClass: "page-link",
-                  attrs: { href: "#" },
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      _vm.nextPage()
-                    }
-                  }
-                },
-                [_vm._v("Next")]
-              )
-            ])
-          ])
+                  },
+                  [
+                    _c(
+                      "a",
+                      { staticClass: "page-link", attrs: { href: "#" } },
+                      [_vm._v(_vm._s(page) + " ")]
+                    )
+                  ]
+                )
+              }),
+              _vm._v(" "),
+              _vm.data.currentPage < _vm.data.totalPages
+                ? _c("li", { staticClass: "page-item" }, [
+                    _c(
+                      "a",
+                      {
+                        staticClass: "page-link",
+                        attrs: { href: "#" },
+                        on: {
+                          click: function($event) {
+                            $event.preventDefault()
+                            _vm.nextPage()
+                          }
+                        }
+                      },
+                      [_vm._v("Next")]
+                    )
+                  ])
+                : _vm._e()
+            ],
+            2
+          )
         ])
       ]),
       _vm._v(" "),
@@ -47492,32 +47556,7 @@ var render = function() {
     1
   )
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("li", { staticClass: "page-item" }, [
-      _c("a", { staticClass: "page-link", attrs: { href: "#" } }, [_vm._v("1")])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("li", { staticClass: "page-item" }, [
-      _c("a", { staticClass: "page-link", attrs: { href: "#" } }, [_vm._v("2")])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("li", { staticClass: "page-item" }, [
-      _c("a", { staticClass: "page-link", attrs: { href: "#" } }, [_vm._v("3")])
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
