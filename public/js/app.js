@@ -47311,6 +47311,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['thumbsPerPage'],
@@ -47444,7 +47453,7 @@ var render = function() {
       _c("div", { staticClass: "col" }, [
         _c("div", { staticClass: "upload-btn-wrapper" }, [
           _c("button", { staticClass: "btn btn-success" }, [
-            _vm._v("Upload pdf")
+            _vm._v("Add new document")
           ]),
           _vm._v(" "),
           _c("input", {
@@ -47588,7 +47597,7 @@ var render = function() {
           ],
           1
         )
-      : _c("div", [_c("p", [_vm._v("No pdfs :(")])])
+      : _c("div", [_c("p", [_vm._v("No documents :(")])])
   ])
 }
 var staticRenderFns = []

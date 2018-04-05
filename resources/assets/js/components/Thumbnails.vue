@@ -1,14 +1,20 @@
 <template>
     <div>
+
+        <!-- Upload button -->
         <div class="row">
             <div class="col">
                 <div class="upload-btn-wrapper">
-                    <button class="btn btn-success">Upload pdf</button>
+                    <button class="btn btn-success">Add new document</button>
                     <input ref="pdfInput" type="file" accept=".pdf" v-on:change="uploadPdfHandler">
                 </div>
             </div>
         </div>
+        <!-- End of Upload button -->
+
         <div v-if="data.total">
+
+            <!-- Thumbs -->
             <div class="row thumbnails">
                 <div class="col-3" v-for="pdf in data.pdfs[data.currentPage]">
                     <a v-on:click.prevent="openPdf(pdf)" href="#">
@@ -16,7 +22,9 @@
                     </a>
                 </div>
             </div>
+            <!-- End of Thumbs -->
 
+            <!-- Paginator -->
             <div class="row">
                 <div class="col">
                     <nav aria-label="Page navigation example">
@@ -39,6 +47,7 @@
                     </nav>
                 </div>
             </div>
+            <!-- End of paginator -->
 
             <modal v-if="show.pdf" @close="show.pdf = false">
                 <iframe slot="body" :src="data.activePdf.url"></iframe>
@@ -47,7 +56,7 @@
 
         </div>
         <div v-else>
-            <p>No pdfs :(</p>
+            <p>No documents :(</p>
         </div>
 
     </div>
