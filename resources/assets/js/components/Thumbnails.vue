@@ -4,7 +4,7 @@
             <div class="col">
                 <div class="upload-btn-wrapper">
                     <button class="btn btn-success">Upload pdf</button>
-                    <input type="file" accept=".pdf" v-on:change="uploadPdfHandler">
+                    <input ref="pdfInput" type="file" accept=".pdf" v-on:change="uploadPdfHandler">
                 </div>
             </div>
         </div>
@@ -18,31 +18,33 @@
             </div>
 
             <div class="row">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li v-if="data.currentPage > 1" class="page-item">
-                            <a v-on:click.prevent="prevPage()" class="page-link" href="#">Previous</a>
-                        </li>
-                        <li
-                                v-for="page in data.totalPages"
-                                v-on:click.prevent="setPage(page)"
-                                class="page-item"
-                                :class="{active: page == data.currentPage}"
-                        >
-                            <a class="page-link" href="#">{{ page }} </a>
-                        </li>
-                        <li v-if="data.currentPage < data.totalPages" class="page-item">
-                            <a v-on:click.prevent="nextPage()" class="page-link" href="#">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+                <div class="col">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <li v-if="data.currentPage > 1" class="page-item">
+                                <a v-on:click.prevent="prevPage()" class="page-link" href="#">Previous</a>
+                            </li>
+                            <li
+                                    v-for="page in data.totalPages"
+                                    v-on:click.prevent="setPage(page)"
+                                    class="page-item"
+                                    :class="{active: page == data.currentPage}"
+                            >
+                                <a class="page-link" href="#">{{ page }} </a>
+                            </li>
+                            <li v-if="data.currentPage < data.totalPages" class="page-item">
+                                <a v-on:click.prevent="nextPage()" class="page-link" href="#">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
 
-            <!-- use the modal component, pass in the prop -->
             <modal v-if="show.pdf" @close="show.pdf = false">
                 <iframe slot="body" :src="data.activePdf.url"></iframe>
                 <h3 slot="header">custom header</h3>
             </modal>
+
         </div>
         <div v-else>
             <p>No pdfs :(</p>
@@ -61,12 +63,12 @@
                     pdf: false
                 },
                 data: {
-                    perPage: 0,
-                    currentPage: 1,
-                    total: 0,
-                    totalPages: null,
                     pdfs: {},
-                    activePdf: {}
+                    total: 0,
+                    perPage: 0,
+                    activePdf: {},
+                    currentPage: 1,
+                    totalPages: null,
                 },
                 urls: {
                     pdfs: '/v1/pdfs/',
@@ -106,6 +108,8 @@
 
                 axios.post(this.urls.pdfs, data, config)
                     .then(result => {
+
+                        this.$refs.pdfInput.value = null;
 
                         let isLastPage = this.data.currentPage === this.data.totalPages,
                             currentPagePdfs = this.data.pdfs[this.data.currentPage];

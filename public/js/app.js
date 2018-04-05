@@ -47309,6 +47309,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['thumbsPerPage'],
@@ -47318,12 +47320,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 pdf: false
             },
             data: {
-                perPage: 0,
-                currentPage: 1,
-                total: 0,
-                totalPages: null,
                 pdfs: {},
-                activePdf: {}
+                total: 0,
+                perPage: 0,
+                activePdf: {},
+                currentPage: 1,
+                totalPages: null
             },
             urls: {
                 pdfs: '/v1/pdfs/'
@@ -47363,6 +47365,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             data.append('pdf', pdf);
 
             axios.post(this.urls.pdfs, data, config).then(function (result) {
+
+                _this.$refs.pdfInput.value = null;
 
                 var isLastPage = _this.data.currentPage === _this.data.totalPages,
                     currentPagePdfs = _this.data.pdfs[_this.data.currentPage];
@@ -47444,6 +47448,7 @@ var render = function() {
           ]),
           _vm._v(" "),
           _c("input", {
+            ref: "pdfInput",
             attrs: { type: "file", accept: ".pdf" },
             on: { change: _vm.uploadPdfHandler }
           })
@@ -47478,82 +47483,84 @@ var render = function() {
             ),
             _vm._v(" "),
             _c("div", { staticClass: "row" }, [
-              _c(
-                "nav",
-                { attrs: { "aria-label": "Page navigation example" } },
-                [
-                  _c(
-                    "ul",
-                    { staticClass: "pagination" },
-                    [
-                      _vm.data.currentPage > 1
-                        ? _c("li", { staticClass: "page-item" }, [
-                            _c(
-                              "a",
-                              {
-                                staticClass: "page-link",
-                                attrs: { href: "#" },
-                                on: {
-                                  click: function($event) {
-                                    $event.preventDefault()
-                                    _vm.prevPage()
+              _c("div", { staticClass: "col" }, [
+                _c(
+                  "nav",
+                  { attrs: { "aria-label": "Page navigation example" } },
+                  [
+                    _c(
+                      "ul",
+                      { staticClass: "pagination" },
+                      [
+                        _vm.data.currentPage > 1
+                          ? _c("li", { staticClass: "page-item" }, [
+                              _c(
+                                "a",
+                                {
+                                  staticClass: "page-link",
+                                  attrs: { href: "#" },
+                                  on: {
+                                    click: function($event) {
+                                      $event.preventDefault()
+                                      _vm.prevPage()
+                                    }
                                   }
+                                },
+                                [_vm._v("Previous")]
+                              )
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm._l(_vm.data.totalPages, function(page) {
+                          return _c(
+                            "li",
+                            {
+                              staticClass: "page-item",
+                              class: { active: page == _vm.data.currentPage },
+                              on: {
+                                click: function($event) {
+                                  $event.preventDefault()
+                                  _vm.setPage(page)
                                 }
-                              },
-                              [_vm._v("Previous")]
-                            )
-                          ])
-                        : _vm._e(),
-                      _vm._v(" "),
-                      _vm._l(_vm.data.totalPages, function(page) {
-                        return _c(
-                          "li",
-                          {
-                            staticClass: "page-item",
-                            class: { active: page == _vm.data.currentPage },
-                            on: {
-                              click: function($event) {
-                                $event.preventDefault()
-                                _vm.setPage(page)
                               }
-                            }
-                          },
-                          [
-                            _c(
-                              "a",
-                              {
-                                staticClass: "page-link",
-                                attrs: { href: "#" }
-                              },
-                              [_vm._v(_vm._s(page) + " ")]
-                            )
-                          ]
-                        )
-                      }),
-                      _vm._v(" "),
-                      _vm.data.currentPage < _vm.data.totalPages
-                        ? _c("li", { staticClass: "page-item" }, [
-                            _c(
-                              "a",
-                              {
-                                staticClass: "page-link",
-                                attrs: { href: "#" },
-                                on: {
-                                  click: function($event) {
-                                    $event.preventDefault()
-                                    _vm.nextPage()
+                            },
+                            [
+                              _c(
+                                "a",
+                                {
+                                  staticClass: "page-link",
+                                  attrs: { href: "#" }
+                                },
+                                [_vm._v(_vm._s(page) + " ")]
+                              )
+                            ]
+                          )
+                        }),
+                        _vm._v(" "),
+                        _vm.data.currentPage < _vm.data.totalPages
+                          ? _c("li", { staticClass: "page-item" }, [
+                              _c(
+                                "a",
+                                {
+                                  staticClass: "page-link",
+                                  attrs: { href: "#" },
+                                  on: {
+                                    click: function($event) {
+                                      $event.preventDefault()
+                                      _vm.nextPage()
+                                    }
                                   }
-                                }
-                              },
-                              [_vm._v("Next")]
-                            )
-                          ])
-                        : _vm._e()
-                    ],
-                    2
-                  )
-                ]
-              )
+                                },
+                                [_vm._v("Next")]
+                              )
+                            ])
+                          : _vm._e()
+                      ],
+                      2
+                    )
+                  ]
+                )
+              ])
             ]),
             _vm._v(" "),
             _vm.show.pdf

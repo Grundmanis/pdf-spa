@@ -17,7 +17,7 @@ class PdfThumbCreator
         $image = new \Imagick($path . '[0]');
         $image->setImageColorspace(255); // prevent image colors from inverting
         $image->setimageformat("jpeg");
-        $image->thumbnailimage(60, 80);
+        $image->thumbnailimage(200, 300);
         $image->writeimage($thumbPath);
 
         return $thumbPath;
